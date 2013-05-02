@@ -1,0 +1,40 @@
+DateTime issue in WCF service call:-
+
+Sometimes we face problem in working datetime timezones with wcf service calls.
+e.g. in my situation I have code that passes date into WCF via JSON object.
+Suppose I am sending my date as "12/02/2013"(dd/mm/YYYY format) from jquery side, it was getting the date as "11/02/2013" on the service method.
+
+This was happening because of the time zone difference between my server and client.
+
+The solution to this problem is convert the Datetime object being passed to the server into UTC ( Datetime.ToUniversalTime) before passing it.
+That way we always receive the UTC time at the server, irrespective of wherever the clients exists.
+
+And on the client, whenever you receive the Datetime, convert it to the localtime ( DateTime.ToLocalTime ).
+
+Example:-
+
+	I have a input type date where I am setting date via a date picker.Suppose I have set value to the textbox as '12/10/2013'.
+	Now we need to add the following code in our method where we are creating the JSON object.
+	
+	var date = '12/10/2013';
+	
+	//  Making date object from date string parameter
+    var newDate = new Date();
+    var splitStringDate = date.split("/");
+
+    // Setting new date
+    newDate.setMonth((splitStringDate[1] - 1), splitStringDate[0]);
+    newDate.setDate(splitStringDate[0]);
+    newDate.setYear(splitStringDate[2]);
+	
+	// Here we will set date object to Utc
+	var utcDate = new Date(Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), newDate.getHours(), newDate.getMinutes(), newDate.getSeconds(), newDate.getMilliseconds()));
+	
+	// In wcf service always we have to pass the date as follows
+	
+	var finalDate = '/Date(' + utcDate.getTime() + ')/';
+	
+Now , we can send this date object(finalDate) to service method so that it will always get the UTC time.
+
+Hope it helps!
+Happy Coding.
